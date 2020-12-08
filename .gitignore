@@ -98,4 +98,4 @@ lint/tmp/
 /build
 /captures
 .cxx
-*/myinfo-config.json
+*/myinfo_config.json
