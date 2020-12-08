@@ -1,7 +1,6 @@
 package sg.nedigital.myinfo.di
 
 import android.app.Application
-import com.google.gson.Gson
 import dagger.BindsInstance
 import dagger.Component
 import sg.nedigital.myinfo.MyInfoConfiguration

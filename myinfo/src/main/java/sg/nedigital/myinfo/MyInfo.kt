@@ -2,7 +2,6 @@ package sg.nedigital.myinfo
 
 import android.app.Application
 
-
 class MyInfo {
     companion object {
         @Volatile

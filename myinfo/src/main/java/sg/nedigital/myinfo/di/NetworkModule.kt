@@ -85,7 +85,10 @@ class NetworkModule {
 
     @Provides
     @MyInfoScope
-    fun provideMyInfoConfiguration(context: Application, storage: MyInfoStorage): MyInfoConfiguration {
+    fun provideMyInfoConfiguration(
+        context: Application,
+        storage: MyInfoStorage
+    ): MyInfoConfiguration {
         return MyInfoConfiguration(context.applicationContext, storage)
     }
 }

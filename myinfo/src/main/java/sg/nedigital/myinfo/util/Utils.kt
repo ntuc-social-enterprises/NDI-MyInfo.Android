@@ -1,16 +1,10 @@
 package sg.nedigital.myinfo.util
 
 import android.content.Context
-import android.net.Uri
-import android.security.keystore.KeyPermanentlyInvalidatedException
-import android.security.keystore.UserNotAuthenticatedException
-import android.util.Base64
 import android.util.Log
-import android.widget.Toast
-import java.security.KeyStore
-import java.security.PrivateKey
-import java.security.Signature
-import java.util.*
+import java.util.Date
+import java.util.TreeMap
+import java.util.UUID
 
 class Utils {
     companion object {
@@ -88,6 +82,5 @@ class Utils {
 //            }
 //            return null
 //        }
-
     }
 }

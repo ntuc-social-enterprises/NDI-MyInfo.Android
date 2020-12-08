@@ -21,7 +21,8 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
-import com.google.gson.Gson
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import kotlinx.android.synthetic.main.activity_login.*
 import org.json.JSONObject
 import sg.nedigital.myinfo.MyInfo
@@ -31,8 +32,6 @@ import sg.nedigital.myinfo.extensions.getName
 import sg.nedigital.myinfo.extensions.getNationality
 import sg.nedigital.myinfo.extensions.getSex
 import sg.nedigital.myinfo.util.MyInfoCallback
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
  * Demonstrates the usage of the AppAuth to authorize a user with an OAuth2 / OpenID Connect
@@ -135,7 +134,6 @@ class LoginActivity : AppCompatActivity() {
                     ).show()
                     tv_access_token.text = "Error fetching access token: ${throwable.message}"
                 }
-
             })
 //            val intent = Intent(this, TokenActivity::class.java)
 //            intent.putExtras(data!!.extras!!)

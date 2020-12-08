@@ -7,15 +7,18 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.auth0.android.jwt.JWT
 import com.google.gson.Gson
 import com.google.gson.JsonElement
-import com.google.gson.JsonParser
-import net.openid.appauth.*
+import net.openid.appauth.AppAuthConfiguration
+import net.openid.appauth.AuthState
+import net.openid.appauth.AuthorizationRequest
+import net.openid.appauth.AuthorizationService
+import net.openid.appauth.AuthorizationServiceConfiguration
+import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.browser.AnyBrowserMatcher
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import sg.nedigital.myinfo.MyInfoConfiguration
-import sg.nedigital.myinfo.entities.Person
 import sg.nedigital.myinfo.exceptions.MyInfoException
 import sg.nedigital.myinfo.services.MyInfoService
 import sg.nedigital.myinfo.util.AuthStateManager
@@ -37,13 +40,14 @@ class MyInfoRepositoryImpl @Inject constructor(
     private val context: Application,
     private val gson: Gson
 ) : MyInfoRepository {
-    private var mAuthService: AuthorizationService? = null
-    private var mExecutor = Executors.newSingleThreadExecutor()
+    private var authService: AuthorizationService? = null
 
-    private val mAuthRequest: AtomicReference<AuthorizationRequest?> =
+    private var executor = Executors.newSingleThreadExecutor()
+
+    private val authRequest: AtomicReference<AuthorizationRequest?> =
         AtomicReference<AuthorizationRequest?>()
 
-    private val mAuthIntent = AtomicReference<CustomTabsIntent>()
+    private val authIntent = AtomicReference<CustomTabsIntent>()
 
     init {
         if (configuration.hasConfigurationChanged()) {
@@ -71,12 +75,12 @@ class MyInfoRepositoryImpl @Inject constructor(
     }
 
     private fun warmUpBrowser() {
-        mExecutor.execute {
+        executor.execute {
             Log.i("test", "Warming up browser instance for auth request")
             val intentBuilder: CustomTabsIntent.Builder =
-                mAuthService?.createCustomTabsIntentBuilder(mAuthRequest.get()?.toUri())!!
+                authService?.createCustomTabsIntentBuilder(authRequest.get()?.toUri())!!
             intentBuilder.setToolbarColor(context.resources.getColor(sg.nedigital.myinfo.R.color.myinfo_primary_color))
-            mAuthIntent.set(intentBuilder.build())
+            authIntent.set(intentBuilder.build())
         }
     }
 
@@ -101,11 +105,11 @@ class MyInfoRepositoryImpl @Inject constructor(
 
     private fun recreateAuthorizationService() {
         Log.d("test", "Discarding existing AuthService instance")
-        mAuthService?.dispose()
+        authService?.dispose()
 
-        mAuthService = createAuthorizationService()
-        mAuthRequest.set(null)
-        mAuthIntent.set(null)
+        authService = createAuthorizationService()
+        authRequest.set(null)
+        authIntent.set(null)
     }
 
     private fun createAuthorizationService(): AuthorizationService {
@@ -130,14 +134,14 @@ class MyInfoRepositoryImpl @Inject constructor(
                 configuration.redirectUri
             ).setScope(configuration.scope)
                 .setAdditionalParameters(map)
-        mAuthRequest.set(authRequestBuilder.build())
+        authRequest.set(authRequestBuilder.build())
     }
 
     override fun getAuthIntent(): Intent? {
-        return mAuthRequest.get()?.let {
-            mAuthService?.getAuthorizationRequestIntent(
+        return authRequest.get()?.let {
+            authService?.getAuthorizationRequestIntent(
                 it,
-                mAuthIntent.get()
+                authIntent.get()
             )
         }
     }

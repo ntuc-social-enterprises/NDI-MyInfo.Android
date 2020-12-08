@@ -4,13 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
-import android.util.Log
-import net.openid.appauth.AuthState
 import net.openid.appauth.connectivity.ConnectionBuilder
 import net.openid.appauth.connectivity.DefaultConnectionBuilder
 import okio.Buffer
 import okio.BufferedSource
-import okio.Okio
+import okio.buffer
+import okio.source
 import org.json.JSONException
 import org.json.JSONObject
 import sg.nedigital.myinfo.di.MyInfoScope
@@ -95,7 +94,7 @@ class MyInfoConfiguration constructor(
     @Throws(InvalidConfigurationException::class)
     private fun readConfiguration() {
         val configSource: BufferedSource =
-            Okio.buffer(Okio.source(context.resources.assets.open(CONFIG_INFO_FILE_NAME)))
+            context.resources.assets.open(CONFIG_INFO_FILE_NAME).source().buffer()
         val configData = Buffer()
         try {
             configSource.readAll(configData)
@@ -120,7 +119,7 @@ class MyInfoConfiguration constructor(
             "myinfo_attributes is empty"
         )
         val environmentString = getConfigString("environment")
-        environment = when(environmentString) {
+        environment = when (environmentString) {
             MyInfoEnvironment.SANDBOX.slug -> MyInfoEnvironment.SANDBOX
             MyInfoEnvironment.TEST.slug -> MyInfoEnvironment.TEST
             MyInfoEnvironment.PRODUCTION.slug -> MyInfoEnvironment.PRODUCTION
@@ -133,10 +132,10 @@ class MyInfoConfiguration constructor(
         redirectUri = getRequiredConfigUri("redirect_uri")
         if (!isRedirectUriRegistered()) {
             throw InvalidConfigurationException(
-                "redirect_uri is not handled by any activity in this app! "
-                        + "Ensure that the appAuthRedirectScheme in your build.gradle file "
-                        + "is correctly configured, or that an appropriate intent filter "
-                        + "exists in your app manifest."
+                "redirect_uri is not handled by any activity in this app! " +
+                        "Ensure that the appAuthRedirectScheme in your build.gradle file " +
+                        "is correctly configured, or that an appropriate intent filter " +
+                        "exists in your app manifest."
             )
         }
         authEndpointUri = getRequiredConfigWebUri("authorization_endpoint_uri")

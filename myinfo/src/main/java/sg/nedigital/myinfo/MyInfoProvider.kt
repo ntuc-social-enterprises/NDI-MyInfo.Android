@@ -3,10 +3,17 @@ package sg.nedigital.myinfo
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import net.openid.appauth.*
+import net.openid.appauth.AppAuthConfiguration
+import net.openid.appauth.AuthState
+import net.openid.appauth.AuthorizationException
+import net.openid.appauth.AuthorizationRequest
+import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.AuthorizationService
+import net.openid.appauth.ClientSecretPost
+import net.openid.appauth.GrantTypeValues
+import net.openid.appauth.TokenRequest
 import org.json.JSONObject
 import sg.nedigital.myinfo.di.MyInfoScope
-import sg.nedigital.myinfo.entities.Person
 import sg.nedigital.myinfo.exceptions.MyInfoException
 import sg.nedigital.myinfo.repositories.MyInfoRepository
 import sg.nedigital.myinfo.util.AuthStateManager
@@ -15,7 +22,8 @@ import javax.inject.Inject
 
 interface MyInfoProvider {
     fun getConfiguration(): MyInfoConfiguration
-//    fun getAuthStateManager(): AuthStateManager
+
+    //    fun getAuthStateManager(): AuthStateManager
     fun getAuthIntent(): Intent?
     fun isAuthorized(): Boolean
     fun onPostLogin(context: Context, data: Intent?, callback: MyInfoCallback<String>)
