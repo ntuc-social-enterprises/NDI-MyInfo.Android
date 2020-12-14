@@ -21,8 +21,6 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import kotlinx.android.synthetic.main.activity_login.*
 import org.json.JSONObject
 import sg.nedigital.myinfo.MyInfo
@@ -32,6 +30,8 @@ import sg.nedigital.myinfo.extensions.getName
 import sg.nedigital.myinfo.extensions.getNationality
 import sg.nedigital.myinfo.extensions.getSex
 import sg.nedigital.myinfo.util.MyInfoCallback
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Demonstrates the usage of the AppAuth to authorize a user with an OAuth2 / OpenID Connect
@@ -58,15 +58,18 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
         start_auth.setOnClickListener { startAuth() }
         button_person.setOnClickListener {
+            it.isEnabled = false
             MyInfo.getInstance()
                 .getPerson(
                     object : MyInfoCallback<JSONObject> {
                         override fun onSuccess(payload: JSONObject?) {
+                            it.isEnabled = true
                             val data = payload!!
                             tv_person.text = "Name: ${data.getName().value}\nDob: ${data.getDob().value}\nSex: ${data.getSex().desc}\nNationaility: ${data.getNationality().desc}"
                         }
 
                         override fun onError(throwable: MyInfoException) {
+                            it.isEnabled = true
                             Snackbar.make(
                                 coordinator,
                                 throwable.message ?: "Unknown error",
@@ -76,6 +79,11 @@ class LoginActivity : AppCompatActivity() {
                             tv_person.text = throwable.message ?: "Unknown error"
                         }
                     })
+        }
+
+        button_logout.setOnClickListener {
+            MyInfo.getInstance().logout()
+            showLogoutState()
         }
 
         if (intent.getBooleanExtra(EXTRA_FAILED, false)) {
@@ -94,11 +102,23 @@ class LoginActivity : AppCompatActivity() {
 
         if (MyInfo.getInstance().isAuthorized()) {
             Log.i(TAG, "User is already authenticated, proceeding to token activity")
-//            startActivity(Intent(this, TokenActivity::class.java))
-//            finish()
-
+            showLoginState()
             tv_access_token.text = "Access token : ${MyInfo.getInstance().getLatestAccessToken()}"
+        } else {
+            showLogoutState()
         }
+    }
+
+    private fun showLoginState() {
+        button_logout.visibility = View.VISIBLE
+        button_person.visibility = View.VISIBLE
+        start_auth.visibility = View.GONE
+    }
+
+    private fun showLogoutState() {
+        button_logout.visibility = View.GONE
+        button_person.visibility = View.GONE
+        start_auth.visibility = View.VISIBLE
     }
 
     @Override
@@ -124,6 +144,7 @@ class LoginActivity : AppCompatActivity() {
             MyInfo.getInstance().onPostLogin(this, data, object : MyInfoCallback<String> {
                 override fun onSuccess(payload: String?) {
                     tv_access_token.text = "Access token : $payload"
+                    showLoginState()
                 }
 
                 override fun onError(throwable: MyInfoException) {
@@ -135,17 +156,12 @@ class LoginActivity : AppCompatActivity() {
                     tv_access_token.text = "Error fetching access token: ${throwable.message}"
                 }
             })
-//            val intent = Intent(this, TokenActivity::class.java)
-//            intent.putExtras(data!!.extras!!)
-//            startActivity(intent)
         }
     }
 
     @MainThread
     fun startAuth() {
         displayLoading("Making authorization request")
-        // WrongThread inference is incorrect for lambdas
-        // noinspection WrongThread
         mExecutor.submit { doAuth() }
     }
 

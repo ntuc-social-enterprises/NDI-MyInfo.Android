@@ -30,6 +30,7 @@ interface MyInfoProvider {
     fun getAuthEndpoint(): Uri?
     fun getLatestAccessToken(): String?
     fun getPerson(callback: MyInfoCallback<JSONObject>)
+    fun logout()
 }
 
 @MyInfoScope
@@ -47,7 +48,7 @@ class MyInfoProviderImpl @Inject constructor(
 
     override fun onPostLogin(context: Context, data: Intent?, callback: MyInfoCallback<String>) {
         if (data != null) {
-            val mAuthService = AuthorizationService(
+            val authService = AuthorizationService(
                 context,
                 AppAuthConfiguration.Builder()
                     .setConnectionBuilder(configuration.getConnectionBuilder())
@@ -66,7 +67,7 @@ class MyInfoProviderImpl @Inject constructor(
                 authStateManager.updateAfterAuthorization(response, ex)
                 val request: AuthorizationRequest = response.request
 
-                mAuthService.performTokenRequest(
+                authService.performTokenRequest(
                     TokenRequest.Builder(request.configuration, request.clientId)
                         .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
                         .setRedirectUri(request.redirectUri)
@@ -103,5 +104,9 @@ class MyInfoProviderImpl @Inject constructor(
 
     override fun getPerson(callback: MyInfoCallback<JSONObject>) {
         repository.getPerson(configuration.attributes, callback)
+    }
+
+    override fun logout() {
+        authStateManager.logout()
     }
 }

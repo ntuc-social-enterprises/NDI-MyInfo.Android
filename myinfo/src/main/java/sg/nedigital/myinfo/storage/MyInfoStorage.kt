@@ -3,13 +3,12 @@ package sg.nedigital.myinfo.storage
 import android.app.Application
 import android.content.Context
 import com.google.gson.Gson
-import java.util.concurrent.locks.ReentrantLock
-import javax.inject.Inject
 import net.openid.appauth.AuthState
 import org.json.JSONException
+import java.util.concurrent.locks.ReentrantLock
+import javax.inject.Inject
 
 interface MyInfoStorage {
-
     fun getLastKnownConfigHash(): String?
     fun acceptConfiguration(configHash: String)
     fun readState(): AuthState

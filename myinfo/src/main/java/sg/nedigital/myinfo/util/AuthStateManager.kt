@@ -4,7 +4,6 @@ import android.content.Context
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
-import net.openid.appauth.RegistrationResponse
 import net.openid.appauth.TokenResponse
 import sg.nedigital.myinfo.storage.MyInfoStorage
 import java.util.concurrent.atomic.AtomicReference
@@ -53,23 +52,22 @@ class AuthStateManager @Inject internal constructor(
         return replace(current)
     }
 
-    fun updateAfterRegistration(
-        response: RegistrationResponse?,
-        ex: AuthorizationException?
-    ): AuthState {
-        val current = current
-        if (ex != null) {
-            return current
-        }
-        current.update(response)
-        return replace(current)
-    }
-
     private fun readState(): AuthState {
         return storage.readState()
     }
 
     private fun writeState(state: AuthState?) {
         storage.writeState(state)
+    }
+
+    fun logout() {
+        // discard the authorization and token state, but retain the configuration and
+        // dynamic client registration (if applicable), to save from retrieving them again.
+        val currentState: AuthState = current
+        val clearedState = AuthState(currentState.authorizationServiceConfiguration!!)
+        if (currentState.lastRegistrationResponse != null) {
+            clearedState.update(currentState.lastRegistrationResponse)
+        }
+        replace(clearedState)
     }
 }
