@@ -4,16 +4,13 @@ import android.app.Application
 import android.content.Intent
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
-import com.auth0.android.jwt.JWT
 import com.google.gson.Gson
 import com.google.gson.JsonElement
-import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ResponseTypeValues
-import net.openid.appauth.browser.AnyBrowserMatcher
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
@@ -22,8 +19,9 @@ import sg.nedigital.myinfo.MyInfoConfiguration
 import sg.nedigital.myinfo.exceptions.MyInfoException
 import sg.nedigital.myinfo.services.MyInfoService
 import sg.nedigital.myinfo.util.AuthStateManager
+import sg.nedigital.myinfo.util.JWTDecoder
 import sg.nedigital.myinfo.util.MyInfoCallback
-import java.util.*
+import java.util.HashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
@@ -38,7 +36,8 @@ class MyInfoRepositoryImpl @Inject constructor(
     private val authStateManager: AuthStateManager,
     private val configuration: MyInfoConfiguration,
     private val context: Application,
-    private val gson: Gson
+    private val gson: Gson,
+    private val jwtDecoder: JWTDecoder
 ) : MyInfoRepository {
     private var authService: AuthorizationService? = null
 
@@ -77,10 +76,7 @@ class MyInfoRepositoryImpl @Inject constructor(
     private fun warmUpBrowser() {
         executor.execute {
             Log.i("test", "Warming up browser instance for auth request")
-            val intentBuilder: CustomTabsIntent.Builder =
-                authService?.createCustomTabsIntentBuilder(authRequest.get()?.toUri())!!
-            intentBuilder.setToolbarColor(context.resources.getColor(sg.nedigital.myinfo.R.color.myinfo_primary_color))
-            authIntent.set(intentBuilder.build())
+            authIntent.set(configuration.warmUpBrowser(authService, authRequest.get())!!)
         }
     }
 
@@ -107,19 +103,11 @@ class MyInfoRepositoryImpl @Inject constructor(
         Log.d("test", "Discarding existing AuthService instance")
         authService?.dispose()
 
-        authService = createAuthorizationService()
+        authService = configuration.createAuthorizationService()
         authRequest.set(null)
         authIntent.set(null)
     }
 
-    private fun createAuthorizationService(): AuthorizationService {
-        Log.i("test", "Creating authorization service")
-        val builder = AppAuthConfiguration.Builder()
-        builder.setBrowserMatcher(AnyBrowserMatcher.INSTANCE)
-        builder.setConnectionBuilder(configuration.getConnectionBuilder())
-
-        return AuthorizationService(context, builder.build())
-    }
 
     private fun createAuthRequest() {
         val map: MutableMap<String, String> = HashMap()
@@ -152,8 +140,12 @@ class MyInfoRepositoryImpl @Inject constructor(
             callback.onError(MyInfoException("Access token not found"))
             return
         }
-        val jwt = JWT(at)
-        val sub = jwt.getClaim("sub").asString()!!
+        val jwt = jwtDecoder.decode(at)
+        val sub = jwtDecoder.getClaim(jwt)
+        if (sub == null) {
+            callback.onError(MyInfoException("Invalid access token, no claim found"))
+            return
+        }
 
         service.getPerson(
             sub,
@@ -175,6 +167,7 @@ class MyInfoRepositoryImpl @Inject constructor(
             }
         })
 
+//        countDownLatch.await()
 //            val params = TreeMap<String, String>()
 //            params["attributes"] = "name,dob,sex,nationality"
 //            params["client_id"] = "STG-T18CS0001E-NTUC-FAIRPRICE"

@@ -4,6 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
+import android.util.Log
+import androidx.browser.customtabs.CustomTabsIntent
+import net.openid.appauth.AppAuthConfiguration
+import net.openid.appauth.AuthorizationRequest
+import net.openid.appauth.AuthorizationService
+import net.openid.appauth.browser.AnyBrowserMatcher
 import net.openid.appauth.connectivity.ConnectionBuilder
 import net.openid.appauth.connectivity.DefaultConnectionBuilder
 import okio.Buffer
@@ -89,6 +95,15 @@ class MyInfoConfiguration constructor(
 
     private fun getLastKnownConfigHash(): String? {
         return storage.getLastKnownConfigHash()
+    }
+
+    fun createAuthorizationService(): AuthorizationService {
+        Log.i("test", "Creating authorization service")
+        val builder = AppAuthConfiguration.Builder()
+        builder.setBrowserMatcher(AnyBrowserMatcher.INSTANCE)
+        builder.setConnectionBuilder(getConnectionBuilder())
+
+        return AuthorizationService(context, builder.build())
     }
 
     @Throws(InvalidConfigurationException::class)
@@ -208,6 +223,17 @@ class MyInfoConfiguration constructor(
         redirectIntent.addCategory(Intent.CATEGORY_BROWSABLE)
         redirectIntent.data = redirectUri
         return !context.packageManager.queryIntentActivities(redirectIntent, 0).isEmpty()
+    }
+
+    fun warmUpBrowser(
+        authService: AuthorizationService?,
+        authRequest: AuthorizationRequest?
+    ): CustomTabsIntent? {
+        Log.i("test", "Warming up browser instance for auth request")
+        val intentBuilder: CustomTabsIntent.Builder =
+            authService?.createCustomTabsIntentBuilder(authRequest?.toUri())!!
+        intentBuilder.setToolbarColor(context.resources.getColor(R.color.myinfo_primary_color))
+        return intentBuilder.build()
     }
 }
 

@@ -10,4 +10,8 @@ class JWTDecoder {
     fun isExpired(jwt: JWT): Boolean {
         return jwt.expiresAt != null && jwt.expiresAt?.time!! < System.currentTimeMillis()
     }
+
+    fun getClaim(jwt: JWT): String? {
+        return jwt.getClaim("sub").asString()
+    }
 }
