@@ -13,7 +13,10 @@ import sg.nedigital.myinfo.di.MyInfoScope
 import sg.nedigital.myinfo.exceptions.MyInfoException
 import sg.nedigital.myinfo.repositories.MyInfoRepository
 import sg.nedigital.myinfo.util.AuthStateManager
+import sg.nedigital.myinfo.util.MyInfoAuthentication
 import sg.nedigital.myinfo.util.MyInfoCallback
+import sg.nedigital.myinfo.util.Utils
+import java.util.TreeMap
 import javax.inject.Inject
 
 interface MyInfoProvider {
@@ -55,17 +58,35 @@ class MyInfoProviderImpl @Inject constructor(
                 authStateManager.updateAfterAuthorization(response, ex)
                 val request: AuthorizationRequest = response.request
 
+                val authentication = if(configuration.environment == MyInfoEnvironment.SANDBOX) {
+                    ClientSecretPost(configuration.clientSecret)
+                } else {
+                    val params = TreeMap<String, String>()
+                    params["grant_type"] = GrantTypeValues.AUTHORIZATION_CODE
+                    params["code"] = response.authorizationCode!!
+                    params["redirect_uri"] = request.redirectUri.toString()
+                    params["client_id"] = configuration.clientId
+                    params["client_secret"] = configuration.clientSecret
+
+                    val header = Utils.getAuthHeader(context,
+                        "POST",
+                        "https://test.api.myinfo.gov.sg/com/v3/token",
+                        configuration.clientId,
+                        params
+                    )
+                    MyInfoAuthentication(configuration.clientSecret, header)
+                }
                 authService.performTokenRequest(
                     TokenRequest.Builder(request.configuration, request.clientId)
                         .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
                         .setRedirectUri(request.redirectUri)
                         .setAuthorizationCode(response.authorizationCode)
                         .build(),
-                    ClientSecretPost(configuration.clientSecret)
+                    authentication
                 ) { response, ex ->
                     authStateManager.updateAfterTokenResponse(response, ex)
                     if (!authStateManager.current.isAuthorized) {
-                        val message = ("Authorization Code exchange failed" + ex?.error)
+                        val message = ("Authorization Code exchange failed : " + ex?.message)
                         callback.onError(MyInfoException(message))
                     } else {
                         callback.onSuccess(authStateManager.current.accessToken)

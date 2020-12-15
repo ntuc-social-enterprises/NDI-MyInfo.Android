@@ -31,6 +31,7 @@ class MyInfoConfiguration constructor(
 ) {
     companion object {
         const val CONFIG_INFO_FILE_NAME = "myinfo_config.json"
+        const val PRIVATE_KEY_FILE_NAME = "myinfo_certificate.p12"
     }
 
     init {
@@ -44,7 +45,7 @@ class MyInfoConfiguration constructor(
     }
     val debugLog = environment != MyInfoEnvironment.PRODUCTION
 
-    private lateinit var environment: MyInfoEnvironment
+    internal lateinit var environment: MyInfoEnvironment
     private var configJson: JSONObject? = null
     private var configHash: String? = null
     private val configError: String? = null

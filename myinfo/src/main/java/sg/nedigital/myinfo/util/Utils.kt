@@ -1,20 +1,30 @@
 package sg.nedigital.myinfo.util
 
 import android.content.Context
+import android.net.Uri
+import android.util.Base64
 import android.util.Log
+import com.nimbusds.jose.JWEObject
+import com.nimbusds.jose.crypto.RSADecrypter
+import sg.nedigital.myinfo.MyInfoConfiguration
+import java.io.InputStream
+import java.security.KeyStore
+import java.security.PrivateKey
+import java.security.Signature
 import java.util.Date
 import java.util.TreeMap
 import java.util.UUID
 
-class Utils {
+
+internal class Utils {
     companion object {
-        fun getAuthHeader(
+        internal fun getAuthHeader(
             context: Context,
             method: String,
             url: String,
+            appId: String,
             params: TreeMap<String, String>
         ): String {
-            val appId = "NTUC-FAIRPRICE"
             val timestamp = Date().time
             val nonce = UUID.randomUUID().toString().replace("-", "")
             val map = mapOf(
@@ -24,8 +34,7 @@ class Utils {
                 Pair("timestamp", timestamp.toString())
             )
 
-//            val signature = signData(context, map, url, method, params) //todo wait for private cert to be ready
-            val signature = ""
+            val signature = signData(context, map, url, method, params)
             val res = "PKI_SIGN app_id=\"" + appId +
                     "\",timestamp=\"" + timestamp +
                     "\",nonce=\"" + nonce +
@@ -36,51 +45,67 @@ class Utils {
             return res
         }
 
-//        fun signData(context: Context, map: Map<String, String>, url: String, method: String, params: TreeMap<String, String>): String? {
-//            params.putAll(map)
-//            var finalParams = ""
-//
-//            params.forEach {
-//                finalParams += "&${it.key}=${it.value}"
-//            }
-//            val baseStr = "$method&${Uri.parse(url).buildUpon().build()}&${finalParams.removePrefix("&")}"
-//            Log.d("test", "baseStr: $baseStr")
-//
-//            if(!checkKeyExists()){
-//                generateKey(context)
-//            }
-//
-//            try {
-//                //We get the Keystore instance
-//                val keyStore: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply {
-//                    load(null)
-//                }
-//
-//                //Retrieves the private key from the keystore
-//                val privateKey: PrivateKey = keyStore.getKey(KEY_ALIAS, null) as PrivateKey
-//
-//                //We sign the data with the private key. We use RSA algorithm along SHA-256 digest algorithm
-//                val signature: ByteArray? = Signature.getInstance("SHA256withRSA").run {
-//                    initSign(privateKey)
-//                    update(baseStr.toByteArray())
-//                    sign()
-//                }
-//
-//                if (signature != null) {
-//                    Log.d("test", "Signed successfully")
-//                    return Base64.encodeToString(signature, Base64.NO_WRAP)
-//                }
-//
-//            } catch (e: UserNotAuthenticatedException) {
-//                e.printStackTrace()
-//            } catch (e: KeyPermanentlyInvalidatedException) {
-//                //Exception thrown when the key has been invalidated for example when lock screen has been disabled.
-//                Toast.makeText(context, "Keys are invalidated.\n" + e.message, Toast.LENGTH_LONG).show()
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                throw RuntimeException(e)
-//            }
-//            return null
-//        }
+        private fun signData(
+            context: Context,
+            map: Map<String, String>,
+            url: String,
+            method: String,
+            params: TreeMap<String, String>
+        ): String? {
+            params.putAll(map)
+            var finalParams = ""
+
+            params.forEach {
+                finalParams += "&${it.key}=${it.value}"
+            }
+            val baseStr = "$method&${Uri.parse(url).buildUpon().build()}&${finalParams.removePrefix(
+                "&"
+            )}"
+            Log.d("test", "baseStr: $baseStr")
+
+            val privateKey: PrivateKey = getPrivateKey(context)
+
+            try {
+                //We sign the data with the private key. We use RSA algorithm along SHA-256 digest algorithm
+                val signature: ByteArray? = Signature.getInstance("SHA256withRSA").run {
+                    initSign(privateKey)
+                    update(baseStr.toByteArray())
+                    sign()
+                }
+
+                if (signature != null) {
+                    Log.d("test", "Signed successfully")
+                    return Base64.encodeToString(signature, Base64.NO_WRAP)
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                throw RuntimeException(e)
+            }
+            return null
+        }
+
+        internal fun decrypt(context: Context, body: String): String {
+            val privateKey: PrivateKey = getPrivateKey(context)
+
+            val jweObject = JWEObject.parse(body)
+            jweObject.decrypt(RSADecrypter(privateKey))
+            val signedJWT = jweObject.payload.toSignedJWT()
+            val decryptedText = signedJWT.payload.toJSONObject().toString()
+            Log.d("test", "decrypted : " + decryptedText)
+            return decryptedText
+        }
+
+        private fun getPrivateKey(context: Context): PrivateKey {
+            val password = "5qc{J7\$KutNI#d)}ReX&" //todo put to secrets.xml at app module and gitignore it
+            val keyStore: KeyStore = KeyStore.getInstance("pkcs12")
+
+            val inputStream: InputStream =
+                context.resources.assets.open(MyInfoConfiguration.PRIVATE_KEY_FILE_NAME)
+            keyStore.load(inputStream, password.toCharArray())
+
+            val alias: String = keyStore.aliases().nextElement()
+            return keyStore.getKey(alias, password.toCharArray()) as PrivateKey
+        }
     }
 }

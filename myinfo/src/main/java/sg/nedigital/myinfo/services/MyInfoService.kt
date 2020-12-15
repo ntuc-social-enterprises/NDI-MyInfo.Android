@@ -1,6 +1,6 @@
 package sg.nedigital.myinfo.services
 
-import com.google.gson.JsonElement
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -14,5 +14,5 @@ interface MyInfoService {
         @Header("Authorization") auth: String,
         @Query("client_id") clientId: String,
         @Query("attributes") attributes: String
-    ): Call<JsonElement>
+    ): Call<ResponseBody>
 }
