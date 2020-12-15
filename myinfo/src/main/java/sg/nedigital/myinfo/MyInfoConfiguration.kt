@@ -50,12 +50,12 @@ class MyInfoConfiguration constructor(
     private val configError: String? = null
 
     lateinit var clientId: String
-    lateinit var clientSecret: String
-    lateinit var attributes: String
-    var scope: String? = null
-    lateinit var redirectUri: Uri
-    lateinit var authEndpointUri: Uri
-    lateinit var tokenEndpointUri: Uri
+    internal lateinit var clientSecret: String
+    internal lateinit var attributes: String
+    internal var scope: String? = null
+    internal lateinit var redirectUri: Uri
+    internal lateinit var authEndpointUri: Uri
+    internal lateinit var tokenEndpointUri: Uri
 
     /**
      * Indicates whether the configuration has changed from the last known valid state.
@@ -83,13 +83,13 @@ class MyInfoConfiguration constructor(
      * Indicates that the current configuration should be accepted as the "last known valid"
      * configuration.
      */
-    fun acceptConfiguration() {
+    internal fun acceptConfiguration() {
         configHash?.let {
             storage.acceptConfiguration(it)
         }
     }
 
-    fun getConnectionBuilder(): ConnectionBuilder {
+    internal fun getConnectionBuilder(): ConnectionBuilder {
         return DefaultConnectionBuilder.INSTANCE
     }
 
@@ -97,7 +97,7 @@ class MyInfoConfiguration constructor(
         return storage.getLastKnownConfigHash()
     }
 
-    fun createAuthorizationService(): AuthorizationService {
+    internal fun createAuthorizationService(): AuthorizationService {
         Log.i("test", "Creating authorization service")
         val builder = AppAuthConfiguration.Builder()
         builder.setBrowserMatcher(AnyBrowserMatcher.INSTANCE)
@@ -157,7 +157,7 @@ class MyInfoConfiguration constructor(
         tokenEndpointUri = getRequiredConfigWebUri("token_endpoint_uri")
     }
 
-    fun getConfigString(propName: String?): String? {
+    private fun getConfigString(propName: String?): String? {
         var value = configJson!!.optString(propName) ?: return null
         value = value.trim { it <= ' ' }
         return if (TextUtils.isEmpty(value)) {
@@ -174,7 +174,7 @@ class MyInfoConfiguration constructor(
     }
 
     @Throws(InvalidConfigurationException::class)
-    fun getRequiredConfigUri(propName: String): Uri {
+    internal fun getRequiredConfigUri(propName: String): Uri {
         val uriStr = getRequiredConfigString(propName)
         val uri: Uri
         uri = try {
@@ -203,7 +203,7 @@ class MyInfoConfiguration constructor(
     }
 
     @Throws(InvalidConfigurationException::class)
-    fun getRequiredConfigWebUri(propName: String): Uri {
+    internal fun getRequiredConfigWebUri(propName: String): Uri {
         val uri = getRequiredConfigUri(propName)
         val scheme = uri.scheme
         if (TextUtils.isEmpty(scheme) || !("http" == scheme || "https" == scheme)) {
@@ -225,7 +225,7 @@ class MyInfoConfiguration constructor(
         return !context.packageManager.queryIntentActivities(redirectIntent, 0).isEmpty()
     }
 
-    fun warmUpBrowser(
+    internal fun warmUpBrowser(
         authService: AuthorizationService?,
         authRequest: AuthorizationRequest?
     ): CustomTabsIntent? {

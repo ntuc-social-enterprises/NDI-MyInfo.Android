@@ -95,12 +95,6 @@
                     android:text="Auth settings" />
 
                 <TextView
-                    android:id="@+id/auth_endpoint"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textIsSelectable="true" />
-
-                <TextView
                     android:id="@+id/client_id"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

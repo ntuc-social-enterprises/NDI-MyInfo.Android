@@ -2,13 +2,9 @@ package sg.nedigital.myinfo
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import net.openid.appauth.AppAuthConfiguration
-import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationResponse
-import net.openid.appauth.AuthorizationService
 import net.openid.appauth.ClientSecretPost
 import net.openid.appauth.GrantTypeValues
 import net.openid.appauth.TokenRequest
@@ -22,12 +18,9 @@ import javax.inject.Inject
 
 interface MyInfoProvider {
     fun getConfiguration(): MyInfoConfiguration
-
-    //    fun getAuthStateManager(): AuthStateManager
     fun getAuthIntent(): Intent?
     fun isAuthorized(): Boolean
     fun onPostLogin(context: Context, data: Intent?, callback: MyInfoCallback<String>)
-    fun getAuthEndpoint(): Uri?
     fun getLatestAccessToken(): String?
     fun getPerson(callback: MyInfoCallback<JSONObject>)
     fun logout()
@@ -48,12 +41,7 @@ class MyInfoProviderImpl @Inject constructor(
 
     override fun onPostLogin(context: Context, data: Intent?, callback: MyInfoCallback<String>) {
         if (data != null) {
-            val authService = AuthorizationService(
-                context,
-                AppAuthConfiguration.Builder()
-                    .setConnectionBuilder(configuration.getConnectionBuilder())
-                    .build()
-            )
+            val authService = configuration.createAuthorizationService()
 
             val response = AuthorizationResponse.fromIntent(data)
             val ex = AuthorizationException.fromIntent(data)
@@ -91,11 +79,6 @@ class MyInfoProviderImpl @Inject constructor(
         } else {
             callback.onError(MyInfoException("Intent data passed is empty"))
         }
-    }
-
-    override fun getAuthEndpoint(): Uri? {
-        val state: AuthState = authStateManager.current
-        return state.authorizationServiceConfiguration?.authorizationEndpoint
     }
 
     override fun getLatestAccessToken(): String? {

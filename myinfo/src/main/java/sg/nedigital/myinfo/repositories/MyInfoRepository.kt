@@ -62,7 +62,6 @@ class MyInfoRepositoryImpl @Inject constructor(
     }
 
     private fun initializeClient() {
-        Log.i("test", "Using static client ID: " + configuration.clientId)
         // use a statically configured client ID
         initializeAuthRequest()
     }
@@ -70,27 +69,22 @@ class MyInfoRepositoryImpl @Inject constructor(
     private fun initializeAuthRequest() {
         createAuthRequest()
         warmUpBrowser()
-//        displayAuthOptions()
     }
 
     private fun warmUpBrowser() {
         executor.execute {
-            Log.i("test", "Warming up browser instance for auth request")
             authIntent.set(configuration.warmUpBrowser(authService, authRequest.get())!!)
         }
     }
 
     private fun initializeAppAuth() {
-        Log.d("test", "Initializing AppAuth")
         recreateAuthorizationService()
         if (authStateManager.current.authorizationServiceConfiguration != null) {
             // configuration is already created, skip to client initialization
-            Log.i("test", "auth config already established")
             initializeClient()
             return
         }
 
-        Log.i("test", "Creating auth config from res/raw/auth_config.json")
         val config = AuthorizationServiceConfiguration(
             configuration.authEndpointUri,
             configuration.tokenEndpointUri
@@ -107,7 +101,6 @@ class MyInfoRepositoryImpl @Inject constructor(
         authRequest.set(null)
         authIntent.set(null)
     }
-
 
     private fun createAuthRequest() {
         val map: MutableMap<String, String> = HashMap()

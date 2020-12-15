@@ -197,11 +197,6 @@ class LoginActivity : AppCompatActivity() {
         loading_container.visibility = View.GONE
         error_container.visibility = View.GONE
 
-        var authEndpointStr: String = "Static auth endpoint: \n"
-
-        authEndpointStr += MyInfo.getInstance().getAuthEndpoint()
-        auth_endpoint.text = authEndpointStr
-
         var clientIdStr: String = "Static client ID: \n"
         clientIdStr += MyInfo.getInstance().getConfiguration().clientId
         client_id.text = clientIdStr
