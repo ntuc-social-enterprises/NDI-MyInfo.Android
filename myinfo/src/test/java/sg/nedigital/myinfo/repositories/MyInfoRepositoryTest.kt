@@ -32,11 +32,13 @@ import org.robolectric.util.ReflectionHelpers
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import sg.nedigital.myinfo.MyInfoConfiguration
+import sg.nedigital.myinfo.MyInfoEnvironment
 import sg.nedigital.myinfo.exceptions.MyInfoException
 import sg.nedigital.myinfo.services.MyInfoService
 import sg.nedigital.myinfo.util.AuthStateManager
 import sg.nedigital.myinfo.util.JWTDecoder
 import sg.nedigital.myinfo.util.MyInfoCallback
+import java.util.concurrent.CountDownLatch
 
 @RunWith(RobolectricTestRunner::class)
 internal class MyInfoRepositoryTest {
@@ -89,13 +91,12 @@ internal class MyInfoRepositoryTest {
             on { getConnectionBuilder() }.thenReturn(DefaultConnectionBuilder.INSTANCE)
             on { warmUpBrowser(anyOrNull(), anyOrNull()) }.thenReturn(mock())
             on { createAuthorizationService() }.thenReturn(authServiceMock)
-        }
-        config.stub {
             on { clientId }.thenReturn("client_id")
             on { authEndpointUri }.thenReturn(Uri.parse("https://authEndpoint.com"))
             on { tokenEndpointUri }.thenReturn(Uri.parse("https://tokenEndpoint.com"))
             on { redirectUri }.thenReturn(Uri.parse("https://redirect.com"))
             on { attributes }.thenReturn("attributes")
+            on { environment }.thenReturn(MyInfoEnvironment.SANDBOX)
         }
 
         repository = MyInfoRepositoryImpl(
@@ -115,6 +116,8 @@ internal class MyInfoRepositoryTest {
 
     @Test
     fun getPersonTestSuccess() {
+        val latch = CountDownLatch(1)
+
         whenever(authStateManager.current.accessToken).thenReturn("at")
         whenever(jwtDecoder.decode(any())).thenReturn(mock())
         whenever(jwtDecoder.getClaim(any())).thenReturn("123")
@@ -122,48 +125,82 @@ internal class MyInfoRepositoryTest {
         repository.getPerson("attributes", object : MyInfoCallback<JSONObject> {
             override fun onSuccess(payload: JSONObject?) {
                 println("success")
+                latch.countDown()
             }
 
             override fun onError(throwable: MyInfoException) {
                 Assert.fail(throwable.message)
+                latch.countDown()
             }
         })
+        latch.await()
+    }
+
+    @Test
+    fun `getPersonTest success no body`() {
+        val latch = CountDownLatch(1)
+
+        whenever(authStateManager.current.accessToken).thenReturn("at")
+        whenever(jwtDecoder.decode(any())).thenReturn(mock())
+        whenever(jwtDecoder.getClaim(any())).thenReturn("123")
+        mockServer.enqueue(MockResponse().setResponseCode(200))
+        repository.getPerson("attributes", object : MyInfoCallback<JSONObject> {
+            override fun onSuccess(payload: JSONObject?) {
+                Assert.fail("it should fail with empty body")
+                latch.countDown()
+            }
+
+            override fun onError(throwable: MyInfoException) {
+                assertEquals("Empty response", throwable.message)
+                latch.countDown()
+            }
+        })
+        latch.await()
     }
 
     @Test
     fun getPersonTestNoAccessToken() {
+        val latch = CountDownLatch(1)
         whenever(authStateManager.current.accessToken).thenReturn(null)
         whenever(jwtDecoder.decode(any())).thenReturn(mock())
         whenever(jwtDecoder.getClaim(any())).thenReturn("123")
         repository.getPerson("attributes", object : MyInfoCallback<JSONObject> {
             override fun onSuccess(payload: JSONObject?) {
                 Assert.fail("should error on no AT")
+                latch.countDown()
             }
 
             override fun onError(throwable: MyInfoException) {
                 assertEquals("Access token not found", throwable.message)
+                latch.countDown()
             }
         })
+        latch.await()
     }
 
     @Test
     fun getPersonTestNoSubClaim() {
+        val latch = CountDownLatch(1)
         whenever(authStateManager.current.accessToken).thenReturn("at")
         whenever(jwtDecoder.decode(any())).thenReturn(mock())
         whenever(jwtDecoder.getClaim(any())).thenReturn(null)
         repository.getPerson("attributes", object : MyInfoCallback<JSONObject> {
             override fun onSuccess(payload: JSONObject?) {
                 Assert.fail("should error on no claim")
+                latch.countDown()
             }
 
             override fun onError(throwable: MyInfoException) {
                 assertEquals("Invalid access token, no claim found", throwable.message)
+                latch.countDown()
             }
         })
+        latch.await()
     }
 
     @Test
     fun getPersonTestFail() {
+        val latch = CountDownLatch(1)
         whenever(authStateManager.current.accessToken).thenReturn("at")
         whenever(jwtDecoder.decode(any())).thenReturn(mock())
         whenever(jwtDecoder.getClaim(any())).thenReturn("123")
@@ -171,17 +208,21 @@ internal class MyInfoRepositoryTest {
         repository.getPerson("attributes", object : MyInfoCallback<JSONObject> {
             override fun onSuccess(payload: JSONObject?) {
                 Assert.fail("should error on return 400")
+                latch.countDown()
             }
 
             override fun onError(throwable: MyInfoException) {
                 throwable.printStackTrace()
                 println(throwable.message)
+                latch.countDown()
             }
         })
+        latch.await()
     }
 
     @Test
     fun getPersonTestException() {
+        val latch = CountDownLatch(1)
         whenever(authStateManager.current.accessToken).thenReturn("at")
         whenever(jwtDecoder.decode(any())).thenReturn(mock())
         whenever(jwtDecoder.getClaim(any())).thenReturn("123")
@@ -191,13 +232,16 @@ internal class MyInfoRepositoryTest {
         repository.getPerson("attributes", object : MyInfoCallback<JSONObject> {
             override fun onSuccess(payload: JSONObject?) {
                 Assert.fail("should error on no connection")
+                latch.countDown()
             }
 
             override fun onError(throwable: MyInfoException) {
                 throwable.printStackTrace()
                 println(throwable.message)
+                latch.countDown()
             }
         })
+        latch.await()
     }
 
     @Test

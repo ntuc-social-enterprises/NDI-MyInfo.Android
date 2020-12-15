@@ -188,22 +188,9 @@ class MyInfoRepositoryImpl @Inject constructor(
                 callback.onError(MyInfoException("Fail on fetching person API", t))
             }
         })
-
-//        countDownLatch.await()
-//            val params = TreeMap<String, String>()
-//            params["attributes"] = "name,dob,sex,nationality"
-//            params["client_id"] = "STG-T18CS0001E-NTUC-FAIRPRICE"
-//            val request: Request = Builder()
-//                .url(url)
-//                .addHeader(
-//                    "Authorization",
-//                    Util.Companion.getAuthHeader(this, "GET", baseUrl, params)
-//                        .toString() + ",Bearer " + accessToken
-//                )
-//                .build()
     }
 
     private fun decodeResponse(response: String): JSONObject {
-        return JSONObject(Utils.decrypt(context, response))
+        return JSONObject(Utils.decrypt(context, response) as Map<*, *>)
     }
 }

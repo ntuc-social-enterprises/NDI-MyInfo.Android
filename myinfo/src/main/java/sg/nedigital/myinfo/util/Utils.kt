@@ -85,14 +85,14 @@ internal class Utils {
             return null
         }
 
-        internal fun decrypt(context: Context, body: String): String {
+        internal fun decrypt(context: Context, body: String): MutableMap<String, Any>? {
             val privateKey: PrivateKey = getPrivateKey(context)
 
             val jweObject = JWEObject.parse(body)
             jweObject.decrypt(RSADecrypter(privateKey))
             val signedJWT = jweObject.payload.toSignedJWT()
-            val decryptedText = signedJWT.payload.toJSONObject().toString()
-            Log.d("test", "decrypted : " + decryptedText)
+            val decryptedText = signedJWT.payload.toJSONObject()
+            Log.d("test", "decrypted : " + decryptedText.toString())
             return decryptedText
         }
 
