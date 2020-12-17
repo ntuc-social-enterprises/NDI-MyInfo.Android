@@ -2,6 +2,8 @@ package sg.nedigital.myinfo
 
 import android.content.Context
 import android.content.Intent
+import java.util.TreeMap
+import javax.inject.Inject
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationResponse
@@ -16,8 +18,6 @@ import sg.nedigital.myinfo.util.AuthStateManager
 import sg.nedigital.myinfo.util.MyInfoAuthentication
 import sg.nedigital.myinfo.util.MyInfoCallback
 import sg.nedigital.myinfo.util.Utils
-import java.util.TreeMap
-import javax.inject.Inject
 
 interface MyInfoProvider {
     fun getConfiguration(): MyInfoConfiguration
@@ -58,7 +58,7 @@ class MyInfoProviderImpl @Inject constructor(
                 authStateManager.updateAfterAuthorization(response, ex)
                 val request: AuthorizationRequest = response.request
 
-                val authentication = if(configuration.environment == MyInfoEnvironment.SANDBOX) {
+                val authentication = if (configuration.environment == MyInfoEnvironment.SANDBOX) {
                     ClientSecretPost(configuration.clientSecret)
                 } else {
                     val params = TreeMap<String, String>()
@@ -96,7 +96,8 @@ class MyInfoProviderImpl @Inject constructor(
             } else if (ex != null) {
                 callback.onError(MyInfoException("Authorization flow failed: " + ex.message))
             } else {
-                callback.onError(MyInfoException("No authorization state retained - reauthorization required"))
+                callback.onError(MyInfoException("No authorization state retained" +
+                        " - reauthorization required"))
             }
         } else {
             callback.onError(MyInfoException("Intent data passed is empty"))

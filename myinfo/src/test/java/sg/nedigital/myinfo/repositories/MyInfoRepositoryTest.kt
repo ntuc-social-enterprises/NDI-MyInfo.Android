@@ -14,6 +14,7 @@ import com.nhaarman.mockitokotlin2.stub
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import java.util.concurrent.CountDownLatch
 import junit.framework.Assert.assertEquals
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationService
@@ -38,7 +39,6 @@ import sg.nedigital.myinfo.services.MyInfoService
 import sg.nedigital.myinfo.util.AuthStateManager
 import sg.nedigital.myinfo.util.JWTDecoder
 import sg.nedigital.myinfo.util.MyInfoCallback
-import java.util.concurrent.CountDownLatch
 
 @RunWith(RobolectricTestRunner::class)
 internal class MyInfoRepositoryTest {

@@ -1,8 +1,8 @@
 package sg.nedigital.myinfo.exceptions
 
+import java.io.IOException
 import org.junit.Assert
 import org.junit.Test
-import java.io.IOException
 
 class InvalidConfigurationExceptionTest {
     @Test

@@ -8,7 +8,8 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class JsonExtensionsTest {
-    val json = JSONObject("{\"name\":{\"lastupdated\":\"2020-10-01\",\"source\":\"1\",\"classification\":\"C\",\"value\":\"MY.INFO:CC\"},\"dob\":{\"lastupdated\":\"2020-10-01\",\"source\":\"1\",\"classification\":\"C\",\"value\":\"1948-02-01\"},\"sex\":{\"lastupdated\":\"2020-10-01\",\"code\":\"M\",\"source\":\"1\",\"classification\":\"C\",\"desc\":\"MALE\"},\"nationality\":{\"lastupdated\":\"2020-10-01\",\"code\":\"IN\",\"source\":\"1\",\"classification\":\"C\",\"desc\":\"INDIAN\"}}")
+
+    val json = JSONObject("{\"name\":{\"lastupdated\":\"2020-10-01\",\"source\":\"1\",\"classification\":\"C\",\"value\":\"MY.INFO:CC\"},\"dob\":{\"lastupdated\":\"2020-10-01\",\"source\":\"1\",\"classification\":\"C\",\"value\":\"1948-02-01\"},\"sex\":{\"lastupdated\":\"2020-10-01\",\"code\":\"M\",\"source\":\"1\",\"classification\":\"C\",\"desc\":\"MALE\"},\"nationality\":{\"lastupdated\":\"2020-10-01\",\"code\":\"IN\",\"source\":\"1\",\"classification\":\"C\",\"desc\":\"INDIAN\"}}") // ktlint-disable
 
     @Test
     fun getDob() {

@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
+import java.util.concurrent.TimeUnit
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -15,7 +16,6 @@ import sg.nedigital.myinfo.services.MyInfoService
 import sg.nedigital.myinfo.storage.MyInfoStorage
 import sg.nedigital.myinfo.util.AuthStateManager
 import sg.nedigital.myinfo.util.JWTDecoder
-import java.util.concurrent.TimeUnit
 
 @Module
 class NetworkModule {
@@ -40,7 +40,11 @@ class NetworkModule {
             .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
             .addInterceptor(
                 HttpLoggingInterceptor().setLevel(
-                    if (configuration.debugLog) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+                    if (configuration.debugLog) {
+                        HttpLoggingInterceptor.Level.BODY
+                    } else {
+                        HttpLoggingInterceptor.Level.NONE
+                    }
                 )
             )
             .build()

@@ -1,18 +1,5 @@
 package sg.nedigital.myinfo.demo
 
-/*
-* Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the
-* License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-* express or implied. See the License for the specific language governing permissions and
-* limitations under the License.
-*/
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -21,6 +8,8 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import kotlinx.android.synthetic.main.activity_login.*
 import org.json.JSONObject
 import sg.nedigital.myinfo.MyInfo
@@ -30,24 +19,7 @@ import sg.nedigital.myinfo.extensions.getName
 import sg.nedigital.myinfo.extensions.getNationality
 import sg.nedigital.myinfo.extensions.getSex
 import sg.nedigital.myinfo.util.MyInfoCallback
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
-/**
- * Demonstrates the usage of the AppAuth to authorize a user with an OAuth2 / OpenID Connect
- * provider. Based on the configuration provided in `res/raw/auth_config.json`, the code
- * contained here will:
- *
- * - Retrieve an OpenID Connect discovery document for the provider, or use a local static
- * configuration.
- * - Utilize dynamic client registration, if no static client id is specified.
- * - Initiate the authorization request using the built-in heuristics or a user-selected browser.
- *
- * _NOTE_: From a clean checkout of this project, the authorization service is not configured.
- * Edit `res/values/auth_config.xml` to provide the required configuration properties. See the
- * README.md in the app/ directory for configuration instructions, and the adjacent IDP-specific
- * instructions.
- */
 class LoginActivity : AppCompatActivity() {
     private lateinit var mExecutor: ExecutorService
 
@@ -59,26 +31,27 @@ class LoginActivity : AppCompatActivity() {
         start_auth.setOnClickListener { startAuth() }
         button_person.setOnClickListener {
             it.isEnabled = false
-            MyInfo.getInstance()
-                .getPerson(
-                    object : MyInfoCallback<JSONObject> {
-                        override fun onSuccess(payload: JSONObject?) {
-                            it.isEnabled = true
-                            val data = payload!!
-                            tv_person.text = "Name: ${data.getName().value}\nDob: ${data.getDob().value}\nSex: ${data.getSex().desc}\nNationaility: ${data.getNationality().desc}"
-                        }
+            MyInfo.getInstance().getPerson(object : MyInfoCallback<JSONObject> {
+                override fun onSuccess(payload: JSONObject?) {
+                    it.isEnabled = true
+                    val data = payload!!
+                    tv_person.text = "Name: ${data.getName().value}" +
+                            "\nDob: ${data.getDob().value}" +
+                            "\nSex: ${data.getSex().desc}" +
+                            "\nNationaility: ${data.getNationality().desc}"
+                }
 
-                        override fun onError(throwable: MyInfoException) {
-                            it.isEnabled = true
-                            Snackbar.make(
-                                coordinator,
-                                throwable.message ?: "Unknown error",
-                                Snackbar.LENGTH_SHORT
-                            ).show()
+                override fun onError(throwable: MyInfoException) {
+                    it.isEnabled = true
+                    Snackbar.make(
+                            coordinator,
+                            throwable.message ?: "Unknown error",
+                            Snackbar.LENGTH_SHORT
+                    ).show()
 
-                            tv_person.text = throwable.message ?: "Unknown error"
-                        }
-                    })
+                    tv_person.text = throwable.message ?: "Unknown error"
+                }
+            })
         }
 
         button_logout.setOnClickListener {
@@ -94,8 +67,9 @@ class LoginActivity : AppCompatActivity() {
 
         if (!MyInfo.getInstance().getConfiguration().isValid()) {
             displayError(
-                MyInfo.getInstance().getConfiguration().getConfigurationError() ?: "Config error",
-                false
+                    MyInfo.getInstance().getConfiguration().getConfigurationError()
+                            ?: "Config error",
+                    false
             )
             return
         }
@@ -149,9 +123,9 @@ class LoginActivity : AppCompatActivity() {
 
                 override fun onError(throwable: MyInfoException) {
                     Snackbar.make(
-                        coordinator,
-                        throwable.message ?: "Unknown error",
-                        Snackbar.LENGTH_SHORT
+                            coordinator,
+                            throwable.message ?: "Unknown error",
+                            Snackbar.LENGTH_SHORT
                     ).show()
                     tv_access_token.text = "Error fetching access token: ${throwable.message}"
                 }
@@ -204,9 +178,9 @@ class LoginActivity : AppCompatActivity() {
 
     private fun displayAuthCancelled() {
         Snackbar.make(
-            findViewById(R.id.coordinator),
-            "Authorization canceled",
-            Snackbar.LENGTH_SHORT
+                findViewById(R.id.coordinator),
+                "Authorization canceled",
+                Snackbar.LENGTH_SHORT
         ).show()
     }
 

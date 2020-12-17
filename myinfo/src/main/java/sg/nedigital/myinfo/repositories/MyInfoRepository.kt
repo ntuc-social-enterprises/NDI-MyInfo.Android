@@ -2,9 +2,13 @@ package sg.nedigital.myinfo.repositories
 
 import android.app.Application
 import android.content.Intent
-import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
 import com.google.gson.Gson
+import java.util.HashMap
+import java.util.TreeMap
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicReference
+import javax.inject.Inject
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
@@ -23,11 +27,6 @@ import sg.nedigital.myinfo.util.AuthStateManager
 import sg.nedigital.myinfo.util.JWTDecoder
 import sg.nedigital.myinfo.util.MyInfoCallback
 import sg.nedigital.myinfo.util.Utils
-import java.util.HashMap
-import java.util.TreeMap
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Inject
 
 interface MyInfoRepository {
     fun getAuthIntent(): Intent?
@@ -53,13 +52,9 @@ class MyInfoRepositoryImpl @Inject constructor(
 
     init {
         if (configuration.hasConfigurationChanged()) {
-            Log.d("test", "config change")
             // discard any existing authorization state due to the change of configuration
-            Log.d("test", "Configuration change detected, discarding old state")
             authStateManager.replace(AuthState())
             configuration.acceptConfiguration()
-        } else {
-            Log.d("test", "no config change")
         }
         initializeAppAuth()
     }
@@ -97,7 +92,6 @@ class MyInfoRepositoryImpl @Inject constructor(
     }
 
     private fun recreateAuthorizationService() {
-        Log.d("test", "Discarding existing AuthService instance")
         authService?.dispose()
 
         authService = configuration.createAuthorizationService()
@@ -169,7 +163,7 @@ class MyInfoRepositoryImpl @Inject constructor(
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
                     val body = response.body()?.string()
-                    if(body.isNullOrEmpty()){
+                    if (body.isNullOrEmpty()) {
                         callback.onError(MyInfoException("Empty response"))
                         return
                     }
@@ -192,6 +186,12 @@ class MyInfoRepositoryImpl @Inject constructor(
     }
 
     private fun decodeResponse(response: String): JSONObject {
-        return JSONObject(Utils.decrypt(context, response, configuration.privateKeyPassword) as Map<*, *>)
+        return JSONObject(
+            Utils.decrypt(
+                context,
+                response,
+                configuration.privateKeyPassword
+            ) as Map<*, *>
+        )
     }
 }

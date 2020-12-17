@@ -9,6 +9,7 @@ import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.stub
 import com.nhaarman.mockitokotlin2.verify
+import java.util.concurrent.CountDownLatch
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.fail
 import net.openid.appauth.AuthState
@@ -27,8 +28,6 @@ import sg.nedigital.myinfo.exceptions.MyInfoException
 import sg.nedigital.myinfo.repositories.MyInfoRepository
 import sg.nedigital.myinfo.util.AuthStateManager
 import sg.nedigital.myinfo.util.MyInfoCallback
-import java.util.concurrent.CountDownLatch
-
 
 @RunWith(RobolectricTestRunner::class)
 class MyInfoProviderTest {
@@ -151,7 +150,7 @@ class MyInfoProviderTest {
 
         val countDownLatch = CountDownLatch(1)
         var isFail = false
-        provider.onPostLogin(application, null, object: MyInfoCallback<String> {
+        provider.onPostLogin(application, null, object : MyInfoCallback<String> {
             override fun onSuccess(payload: String?) {
                 fail("it should fail on empty intent")
                 countDownLatch.countDown()
@@ -218,9 +217,8 @@ class MyInfoProviderTest {
         configuration.stub {
             on { attributes }.thenReturn("attributes")
         }
-        provider.getPerson(object: MyInfoCallback<JSONObject>{
+        provider.getPerson(object : MyInfoCallback<JSONObject> {
             override fun onSuccess(payload: JSONObject?) {
-
             }
 
             override fun onError(throwable: MyInfoException) {
@@ -228,7 +226,6 @@ class MyInfoProviderTest {
         })
         verify(repository).getPerson(any(), any())
     }
-
 
     private fun getMinimalAuthRequestBuilder(): AuthorizationRequest.Builder {
         return AuthorizationRequest.Builder(

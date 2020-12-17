@@ -1,13 +1,13 @@
 package sg.nedigital.myinfo.util
 
 import android.content.Context
+import java.util.concurrent.atomic.AtomicReference
+import javax.inject.Inject
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
 import sg.nedigital.myinfo.storage.MyInfoStorage
-import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Inject
 
 class AuthStateManager @Inject internal constructor(
     context: Context,

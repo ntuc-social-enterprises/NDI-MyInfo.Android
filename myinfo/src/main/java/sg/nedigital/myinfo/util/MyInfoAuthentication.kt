@@ -1,9 +1,10 @@
 package sg.nedigital.myinfo.util
 
-import net.openid.appauth.ClientAuthentication
 import java.util.HashMap
+import net.openid.appauth.ClientAuthentication
 
-class MyInfoAuthentication(private val secret: String, private val authorization: String) : ClientAuthentication {
+class MyInfoAuthentication(private val secret: String, private val authorization: String) :
+    ClientAuthentication {
     val PARAM_CLIENT_ID = "client_id"
     val PARAM_CLIENT_SECRET = "client_secret"
     val PARAM_AUTHORIZATION = "Authorization"

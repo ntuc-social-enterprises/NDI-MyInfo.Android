@@ -6,6 +6,8 @@ import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
+import java.io.IOException
+import java.nio.charset.Charset
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
@@ -21,8 +23,6 @@ import org.json.JSONObject
 import sg.nedigital.myinfo.di.MyInfoScope
 import sg.nedigital.myinfo.exceptions.InvalidConfigurationException
 import sg.nedigital.myinfo.storage.MyInfoStorage
-import java.io.IOException
-import java.nio.charset.Charset
 
 @MyInfoScope
 class MyInfoConfiguration constructor(
@@ -111,7 +111,7 @@ class MyInfoConfiguration constructor(
     @Throws(InvalidConfigurationException::class)
     private fun readConfiguration() {
         val configSource: BufferedSource =
-            context.resources.assets.open(CONFIG_INFO_FILE_NAME).source().buffer()
+                context.resources.assets.open(CONFIG_INFO_FILE_NAME).source().buffer()
         val configData = Buffer()
         try {
             configSource.readAll(configData)
@@ -119,32 +119,36 @@ class MyInfoConfiguration constructor(
             configJson = JSONObject(configData.readString(Charset.forName("UTF-8")))
         } catch (ex: IOException) {
             throw InvalidConfigurationException(
-                "Failed to read configuration: " + ex.message
+                    "Failed to read configuration: " + ex.message
             )
         } catch (ex: JSONException) {
             throw InvalidConfigurationException(
-                "Unable to parse configuration: " + ex.message
+                    "Unable to parse configuration: " + ex.message
             )
         }
-        clientId = getConfigString("client_id") ?: throw InvalidConfigurationException(
-            "client_id is empty"
-        )
-        clientSecret = getConfigString("client_secret") ?: throw InvalidConfigurationException(
-            "client_secret is empty"
-        )
-        attributes = getConfigString("myinfo_attributes") ?: throw InvalidConfigurationException(
-            "myinfo_attributes is empty"
-        )
-        privateKeyPassword = getConfigString("private_key_secret") ?: throw InvalidConfigurationException(
-            "private_key_secret is empty"
-        )
+        clientId = getConfigString("client_id")
+                ?: throw InvalidConfigurationException(
+                        "client_id is empty"
+                )
+        clientSecret = getConfigString("client_secret")
+                ?: throw InvalidConfigurationException(
+                        "client_secret is empty"
+                )
+        attributes = getConfigString("myinfo_attributes")
+                ?: throw InvalidConfigurationException(
+                        "myinfo_attributes is empty"
+                )
+        privateKeyPassword = getConfigString("private_key_secret")
+                ?: throw InvalidConfigurationException(
+                        "private_key_secret is empty"
+                )
         val environmentString = getConfigString("environment")
         environment = when (environmentString) {
             MyInfoEnvironment.SANDBOX.slug -> MyInfoEnvironment.SANDBOX
             MyInfoEnvironment.TEST.slug -> MyInfoEnvironment.TEST
             MyInfoEnvironment.PRODUCTION.slug -> MyInfoEnvironment.PRODUCTION
             else -> throw InvalidConfigurationException(
-                "environment must be one of sandbox, test, or production"
+                    "environment must be one of sandbox, test, or production"
             )
         }
 
@@ -152,10 +156,10 @@ class MyInfoConfiguration constructor(
         redirectUri = getRequiredConfigUri("redirect_uri")
         if (!isRedirectUriRegistered()) {
             throw InvalidConfigurationException(
-                "redirect_uri is not handled by any activity in this app! " +
-                        "Ensure that the appAuthRedirectScheme in your build.gradle file " +
-                        "is correctly configured, or that an appropriate intent filter " +
-                        "exists in your app manifest."
+                    "redirect_uri is not handled by any activity in this app! " +
+                            "Ensure that the appAuthRedirectScheme in your build.gradle file " +
+                            "is correctly configured, or that an appropriate intent filter " +
+                            "exists in your app manifest."
             )
         }
         authEndpointUri = getRequiredConfigWebUri("authorization_endpoint_uri")
@@ -173,9 +177,9 @@ class MyInfoConfiguration constructor(
     @Throws(InvalidConfigurationException::class)
     private fun getRequiredConfigString(propName: String): String {
         return getConfigString(propName)
-            ?: throw InvalidConfigurationException(
-                "$propName is required but not specified in the configuration"
-            )
+                ?: throw InvalidConfigurationException(
+                        "$propName is required but not specified in the configuration"
+                )
     }
 
     @Throws(InvalidConfigurationException::class)
@@ -186,13 +190,13 @@ class MyInfoConfiguration constructor(
             Uri.parse(uriStr)
         } catch (ex: Throwable) {
             throw InvalidConfigurationException(
-                "$propName could not be parsed",
-                ex
+                    "$propName could not be parsed",
+                    ex
             )
         }
         if (!uri.isHierarchical || !uri.isAbsolute) {
             throw InvalidConfigurationException(
-                "$propName must be hierarchical and absolute"
+                    "$propName must be hierarchical and absolute"
             )
         }
         if (!TextUtils.isEmpty(uri.encodedUserInfo)) {
@@ -213,7 +217,7 @@ class MyInfoConfiguration constructor(
         val scheme = uri.scheme
         if (TextUtils.isEmpty(scheme) || !("http" == scheme || "https" == scheme)) {
             throw InvalidConfigurationException(
-                "$propName must have an http or https scheme"
+                    "$propName must have an http or https scheme"
             )
         }
         return uri
@@ -236,7 +240,7 @@ class MyInfoConfiguration constructor(
     ): CustomTabsIntent? {
         Log.i("test", "Warming up browser instance for auth request")
         val intentBuilder: CustomTabsIntent.Builder =
-            authService?.createCustomTabsIntentBuilder(authRequest?.toUri())!!
+                authService?.createCustomTabsIntentBuilder(authRequest?.toUri())!!
         intentBuilder.setToolbarColor(context.resources.getColor(R.color.myinfo_primary_color))
         return intentBuilder.build()
     }
