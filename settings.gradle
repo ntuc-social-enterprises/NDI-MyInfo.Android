@@ -1,0 +1,3 @@
+include ':myinfo'
+include ':app'
+rootProject.name = "MyInfo"
