@@ -156,7 +156,8 @@ class MyInfoRepositoryImpl @Inject constructor(
                 "GET",
                 baseUrl,
                 configuration.clientId,
-                params
+                params,
+                configuration.privateKeyPassword
             ) + ",Bearer $at"
         }
         service.getPerson(
@@ -191,6 +192,6 @@ class MyInfoRepositoryImpl @Inject constructor(
     }
 
     private fun decodeResponse(response: String): JSONObject {
-        return JSONObject(Utils.decrypt(context, response) as Map<*, *>)
+        return JSONObject(Utils.decrypt(context, response, configuration.privateKeyPassword) as Map<*, *>)
     }
 }

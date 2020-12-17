@@ -72,7 +72,8 @@ class MyInfoProviderImpl @Inject constructor(
                         "POST",
                         "https://test.api.myinfo.gov.sg/com/v3/token",
                         configuration.clientId,
-                        params
+                        params,
+                        configuration.privateKeyPassword
                     )
                     MyInfoAuthentication(configuration.clientSecret, header)
                 }

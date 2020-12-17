@@ -53,6 +53,7 @@ class MyInfoConfiguration constructor(
     lateinit var clientId: String
     internal lateinit var clientSecret: String
     internal lateinit var attributes: String
+    internal lateinit var privateKeyPassword: String
     internal var scope: String? = null
     internal lateinit var redirectUri: Uri
     internal lateinit var authEndpointUri: Uri
@@ -133,6 +134,9 @@ class MyInfoConfiguration constructor(
         )
         attributes = getConfigString("myinfo_attributes") ?: throw InvalidConfigurationException(
             "myinfo_attributes is empty"
+        )
+        privateKeyPassword = getConfigString("private_key_secret") ?: throw InvalidConfigurationException(
+            "private_key_secret is empty"
         )
         val environmentString = getConfigString("environment")
         environment = when (environmentString) {

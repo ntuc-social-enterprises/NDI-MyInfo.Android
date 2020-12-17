@@ -23,7 +23,8 @@ internal class Utils {
             method: String,
             url: String,
             appId: String,
-            params: TreeMap<String, String>
+            params: TreeMap<String, String>,
+            privateKeyPassword: String
         ): String {
             val timestamp = Date().time
             val nonce = UUID.randomUUID().toString().replace("-", "")
@@ -34,7 +35,7 @@ internal class Utils {
                 Pair("timestamp", timestamp.toString())
             )
 
-            val signature = signData(context, map, url, method, params)
+            val signature = signData(context, map, url, method, params, privateKeyPassword)
             val res = "PKI_SIGN app_id=\"" + appId +
                     "\",timestamp=\"" + timestamp +
                     "\",nonce=\"" + nonce +
@@ -50,7 +51,8 @@ internal class Utils {
             map: Map<String, String>,
             url: String,
             method: String,
-            params: TreeMap<String, String>
+            params: TreeMap<String, String>,
+            privateKeyPassword: String
         ): String? {
             params.putAll(map)
             var finalParams = ""
@@ -63,7 +65,7 @@ internal class Utils {
             )}"
             Log.d("test", "baseStr: $baseStr")
 
-            val privateKey: PrivateKey = getPrivateKey(context)
+            val privateKey: PrivateKey = getPrivateKey(context, privateKeyPassword)
 
             try {
                 //We sign the data with the private key. We use RSA algorithm along SHA-256 digest algorithm
@@ -85,8 +87,8 @@ internal class Utils {
             return null
         }
 
-        internal fun decrypt(context: Context, body: String): MutableMap<String, Any>? {
-            val privateKey: PrivateKey = getPrivateKey(context)
+        internal fun decrypt(context: Context, body: String, privateKeyPassword: String): MutableMap<String, Any>? {
+            val privateKey: PrivateKey = getPrivateKey(context, privateKeyPassword)
 
             val jweObject = JWEObject.parse(body)
             jweObject.decrypt(RSADecrypter(privateKey))
@@ -96,16 +98,15 @@ internal class Utils {
             return decryptedText
         }
 
-        private fun getPrivateKey(context: Context): PrivateKey {
-            val password = "5qc{J7\$KutNI#d)}ReX&" //todo put to secrets.xml at app module and gitignore it
+        private fun getPrivateKey(context: Context, privateKeyPassword: String): PrivateKey {
             val keyStore: KeyStore = KeyStore.getInstance("pkcs12")
 
             val inputStream: InputStream =
                 context.resources.assets.open(MyInfoConfiguration.PRIVATE_KEY_FILE_NAME)
-            keyStore.load(inputStream, password.toCharArray())
+            keyStore.load(inputStream, privateKeyPassword.toCharArray())
 
             val alias: String = keyStore.aliases().nextElement()
-            return keyStore.getKey(alias, password.toCharArray()) as PrivateKey
+            return keyStore.getKey(alias, privateKeyPassword.toCharArray()) as PrivateKey
         }
     }
 }
