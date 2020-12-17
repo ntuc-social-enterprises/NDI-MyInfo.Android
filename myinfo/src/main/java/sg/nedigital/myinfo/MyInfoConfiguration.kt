@@ -4,10 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
-import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
-import java.io.IOException
-import java.nio.charset.Charset
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
@@ -23,6 +20,8 @@ import org.json.JSONObject
 import sg.nedigital.myinfo.di.MyInfoScope
 import sg.nedigital.myinfo.exceptions.InvalidConfigurationException
 import sg.nedigital.myinfo.storage.MyInfoStorage
+import java.io.IOException
+import java.nio.charset.Charset
 
 @MyInfoScope
 class MyInfoConfiguration constructor(
@@ -100,7 +99,6 @@ class MyInfoConfiguration constructor(
     }
 
     internal fun createAuthorizationService(): AuthorizationService {
-        Log.i("test", "Creating authorization service")
         val builder = AppAuthConfiguration.Builder()
         builder.setBrowserMatcher(AnyBrowserMatcher.INSTANCE)
         builder.setConnectionBuilder(getConnectionBuilder())
@@ -156,7 +154,7 @@ class MyInfoConfiguration constructor(
         redirectUri = getRequiredConfigUri("redirect_uri")
         if (!isRedirectUriRegistered()) {
             throw InvalidConfigurationException(
-                    "redirect_uri is not handled by any activity in this app! " +
+                            "redirect_uri is not handled by any activity in this app! " +
                             "Ensure that the appAuthRedirectScheme in your build.gradle file " +
                             "is correctly configured, or that an appropriate intent filter " +
                             "exists in your app manifest."
@@ -238,7 +236,6 @@ class MyInfoConfiguration constructor(
         authService: AuthorizationService?,
         authRequest: AuthorizationRequest?
     ): CustomTabsIntent? {
-        Log.i("test", "Warming up browser instance for auth request")
         val intentBuilder: CustomTabsIntent.Builder =
                 authService?.createCustomTabsIntentBuilder(authRequest?.toUri())!!
         intentBuilder.setToolbarColor(context.resources.getColor(R.color.myinfo_primary_color))
