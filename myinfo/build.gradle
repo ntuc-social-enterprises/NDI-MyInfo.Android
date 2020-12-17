@@ -4,7 +4,9 @@ plugins {
     id 'kotlin-android-extensions'
     id 'kotlin-kapt'
     id 'org.jlleitschuh.gradle.ktlint'
+    id 'com.github.dcendents.android-maven'
 }
+group='sg.nedigital.myinfo'
 
 android {
     compileSdkVersion 30
