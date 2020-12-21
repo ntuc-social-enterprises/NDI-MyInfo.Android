@@ -2,7 +2,6 @@ package sg.nedigital.myinfo.demo
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
@@ -31,6 +30,9 @@ class LoginActivity : AppCompatActivity() {
         start_auth.setOnClickListener { startAuth() }
         button_person.setOnClickListener {
             it.isEnabled = false
+            loading_container.visibility = View.VISIBLE
+            loading_description.text = "Fetching person API"
+
             MyInfo.getInstance().getPerson(object : MyInfoCallback<JSONObject> {
                 override fun onSuccess(payload: JSONObject?) {
                     it.isEnabled = true
@@ -39,6 +41,7 @@ class LoginActivity : AppCompatActivity() {
                             "\nDob: ${data.getDob().value}" +
                             "\nSex: ${data.getSex().desc}" +
                             "\nNationaility: ${data.getNationality().desc}"
+                    loading_container.visibility = View.GONE
                 }
 
                 override fun onError(throwable: MyInfoException) {
@@ -50,6 +53,7 @@ class LoginActivity : AppCompatActivity() {
                     ).show()
 
                     tv_person.text = throwable.message ?: "Unknown error"
+                    loading_container.visibility = View.GONE
                 }
             })
         }
@@ -75,7 +79,6 @@ class LoginActivity : AppCompatActivity() {
         }
 
         if (MyInfo.getInstance().isAuthorized()) {
-            Log.i(TAG, "User is already authenticated, proceeding to token activity")
             showLoginState()
             tv_access_token.text = "Access token : ${MyInfo.getInstance().getLatestAccessToken()}"
         } else {
@@ -115,13 +118,17 @@ class LoginActivity : AppCompatActivity() {
         if (resultCode == RESULT_CANCELED) {
             displayAuthCancelled()
         } else {
+            loading_container.visibility = View.VISIBLE
+            loading_description.text = "Fetching access token"
             MyInfo.getInstance().onPostLogin(this, data, object : MyInfoCallback<String> {
                 override fun onSuccess(payload: String?) {
                     tv_access_token.text = "Access token : $payload"
                     showLoginState()
+                    loading_container.visibility = View.GONE
                 }
 
                 override fun onError(throwable: MyInfoException) {
+                    loading_container.visibility = View.GONE
                     Snackbar.make(
                             coordinator,
                             throwable.message ?: "Unknown error",
