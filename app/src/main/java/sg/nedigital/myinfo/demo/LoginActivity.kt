@@ -7,6 +7,8 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import kotlinx.android.synthetic.main.activity_login.*
 import org.json.JSONObject
 import sg.nedigital.myinfo.MyInfo
@@ -16,8 +18,6 @@ import sg.nedigital.myinfo.extensions.getName
 import sg.nedigital.myinfo.extensions.getNationality
 import sg.nedigital.myinfo.extensions.getSex
 import sg.nedigital.myinfo.util.MyInfoCallback
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var mExecutor: ExecutorService

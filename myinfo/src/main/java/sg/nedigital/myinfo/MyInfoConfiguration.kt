@@ -5,6 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
 import androidx.browser.customtabs.CustomTabsIntent
+import java.io.IOException
+import java.nio.charset.Charset
 import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
@@ -20,8 +22,6 @@ import org.json.JSONObject
 import sg.nedigital.myinfo.di.MyInfoScope
 import sg.nedigital.myinfo.exceptions.InvalidConfigurationException
 import sg.nedigital.myinfo.storage.MyInfoStorage
-import java.io.IOException
-import java.nio.charset.Charset
 
 @MyInfoScope
 class MyInfoConfiguration constructor(
