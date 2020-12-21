@@ -41,7 +41,6 @@ class LoginActivity : AppCompatActivity() {
                             "\nDob: ${data.getDob().value}" +
                             "\nSex: ${data.getSex().desc}" +
                             "\nNationaility: ${data.getNationality().desc}"
-
                     loading_container.visibility = View.GONE
                 }
 
@@ -121,7 +120,6 @@ class LoginActivity : AppCompatActivity() {
         } else {
             loading_container.visibility = View.VISIBLE
             loading_description.text = "Fetching access token"
-
             MyInfo.getInstance().onPostLogin(this, data, object : MyInfoCallback<String> {
                 override fun onSuccess(payload: String?) {
                     tv_access_token.text = "Access token : $payload"
