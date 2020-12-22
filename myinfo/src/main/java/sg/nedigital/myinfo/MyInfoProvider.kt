@@ -70,7 +70,7 @@ class MyInfoProviderImpl @Inject constructor(
 
                     val header = Utils.getAuthHeader(context,
                         "POST",
-                        "https://test.api.myinfo.gov.sg/com/v3/token",
+                        configuration.tokenEndpointUri.toString(),
                         configuration.clientId,
                         params,
                         configuration.privateKeyPassword
