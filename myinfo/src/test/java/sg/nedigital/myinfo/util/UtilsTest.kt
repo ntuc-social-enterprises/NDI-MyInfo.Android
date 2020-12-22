@@ -2,13 +2,13 @@ package sg.nedigital.myinfo.util
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import java.io.File
+import java.util.TreeMap
 import net.openid.appauth.GrantTypeValues
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
-import java.io.File
-import java.util.TreeMap
 
 @RunWith(RobolectricTestRunner::class)
 class UtilsTest {
@@ -40,5 +40,4 @@ class UtilsTest {
         assert(header.contains("app_id=\"client1\""))
         assert(header.contains("signature="))
     }
-
 }
