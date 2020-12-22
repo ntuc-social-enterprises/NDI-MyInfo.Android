@@ -1,0 +1,11 @@
+{
+  "client_id": "client1",
+  "client_secret": "client_secret",
+  "redirect_uri": "https://google.com/callback",
+  "authorization_scope": "openid email profile",
+  "authorization_endpoint_uri": "https://test.api.myinfo.gov.sg/com/v3/authorise",
+  "token_endpoint_uri": "https://test.api.myinfo.gov.sg/com/v3/token",
+  "environment": "test",
+  "myinfo_attributes": "name,dob,sex,nationality",
+  "private_key_secret": "12345678"
+}

@@ -2,8 +2,6 @@ package sg.nedigital.myinfo
 
 import android.content.Context
 import android.content.Intent
-import java.util.TreeMap
-import javax.inject.Inject
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationResponse
@@ -18,6 +16,8 @@ import sg.nedigital.myinfo.util.AuthStateManager
 import sg.nedigital.myinfo.util.MyInfoAuthentication
 import sg.nedigital.myinfo.util.MyInfoCallback
 import sg.nedigital.myinfo.util.Utils
+import java.util.TreeMap
+import javax.inject.Inject
 
 interface MyInfoProvider {
     fun getConfiguration(): MyInfoConfiguration
@@ -70,7 +70,7 @@ class MyInfoProviderImpl @Inject constructor(
 
                     val header = Utils.getAuthHeader(context,
                         "POST",
-                        "https://test.api.myinfo.gov.sg/com/v3/token",
+                        configuration.tokenEndpointUri.toString(),
                         configuration.clientId,
                         params,
                         configuration.privateKeyPassword

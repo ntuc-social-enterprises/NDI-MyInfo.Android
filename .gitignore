@@ -98,5 +98,3 @@ lint/tmp/
 /build
 /captures
 .cxx
-
-*.p12
