@@ -12,6 +12,12 @@ import com.nimbusds.jose.Payload
 import com.nimbusds.jose.crypto.RSAEncrypter
 import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jwt.SignedJWT
+import java.io.File
+import java.nio.charset.Charset
+import java.security.KeyFactory
+import java.security.interfaces.RSAPublicKey
+import java.security.spec.X509EncodedKeySpec
+import java.util.TreeMap
 import net.openid.appauth.GrantTypeValues
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -21,12 +27,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import sg.nedigital.myinfo.entities.Person
-import java.io.File
-import java.nio.charset.Charset
-import java.security.KeyFactory
-import java.security.interfaces.RSAPublicKey
-import java.security.spec.X509EncodedKeySpec
-import java.util.TreeMap
 
 @RunWith(RobolectricTestRunner::class)
 class UtilsTest {
