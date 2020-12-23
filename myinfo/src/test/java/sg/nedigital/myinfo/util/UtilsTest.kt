@@ -22,10 +22,12 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import sg.nedigital.myinfo.entities.Person
 import java.io.File
+import java.nio.charset.Charset
 import java.security.KeyFactory
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.X509EncodedKeySpec
 import java.util.TreeMap
+
 
 @RunWith(RobolectricTestRunner::class)
 class UtilsTest {
@@ -66,7 +68,8 @@ class UtilsTest {
     fun decryptTest() {
         val header = JWEHeader(JWEAlgorithm.RSA_OAEP, EncryptionMethod.A256CBC_HS512)
 
-        val json = """{"name": {"value": "TAN XIAO HUI","classification": "C","source": "1","lastupdated": "2019-03-26"}}""" // ktlint-disable
+        val json =
+            """{"name": {"value": "TAN XIAO HUI","classification": "C","source": "1","lastupdated": "2019-03-26"}}""" // ktlint-disable
 
         val signedJWT = SignedJWT(
             Base64URL.encode("""{"alg":"RS256","kid":"key_id"}""".toByteArray()),
@@ -90,8 +93,16 @@ class UtilsTest {
     }
 
     private fun getPublicKey(): RSAPublicKey {
-        val publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwIEKaamIeaL6t/7wPJt1YEh37rj2sSBj7fGdnIwIJKoONLGxqD3m8755oPyhItXGn+1mvRs/cvR6hazD8oW+Ekab7wBljo8UCTis5NfjxvXlTEAJdQjX8K7IpjHEx/POIikJZibDFNQHws6eEicdZDw+ZCHItA73mQQ1eYYVuerl4irjNduP8kU8wQKqwldxwCXKH2m0JJpw13Oj12TuE2sqRVnKrXiRbzvIu4BaWOhk7Crjg58SG3gCixXH8op1LMfwxDpeEIr71fE2JBUXqGq9vjDx89iUYqmKF6zQfBOi0wiE+TnANmAMTNqpt82+cv21B5hcwX2+25TdSXXqZQIDAQAB" // ktlint-disable
-        val encoded: ByteArray = Base64.decode(publicKey, Base64.DEFAULT)
+        val bytes = String(
+            context.resources.assets.open("public-key.pem").readBytes(),
+            Charset.defaultCharset()
+        )
+        val publicKeyPEM: String = bytes
+            .replace("-----BEGIN PUBLIC KEY-----", "")
+            .replace(System.lineSeparator(), "")
+            .replace("-----END PUBLIC KEY-----", "")
+
+        val encoded: ByteArray = Base64.decode(publicKeyPEM.toByteArray(), Base64.DEFAULT)
 
         val keyFactory = KeyFactory.getInstance("RSA")
         val keySpec = X509EncodedKeySpec(encoded)
