@@ -105,4 +105,25 @@ class MyInfoConfigurationTest {
         }
         assertNotNull(configuration.warmUpBrowser(authMock, authRequest))
     }
+
+    @Test
+    fun attributeTest() {
+        assertEquals("https://redirect.com/callback", configuration.redirectUri.toString())
+        assertEquals("client1", configuration.clientId)
+        assertEquals("client_secret", configuration.clientSecret)
+        assertEquals("openid email profile", configuration.scope)
+        assertEquals("name,dob,sex,nationality", configuration.attributes)
+        assertEquals("12345678", configuration.privateKeyPassword)
+        assertEquals("https://test.api.myinfo.gov.sg/com/v3/", configuration.host)
+        assertEquals(MyInfoEnvironment.TEST, configuration.environment)
+        assert(configuration.debugLog)
+        assertEquals(
+            "https://test.api.myinfo.gov.sg/com/v3/token",
+            configuration.tokenEndpointUri.toString()
+        )
+        assertEquals(
+            "https://test.api.myinfo.gov.sg/com/v3/authorise",
+            configuration.authEndpointUri.toString()
+        )
+    }
 }
