@@ -30,7 +30,7 @@ import sg.nedigital.myinfo.entities.Person
 
 @RunWith(RobolectricTestRunner::class)
 class UtilsTest {
-    val context = ApplicationProvider.getApplicationContext<Application>()
+    private val context = ApplicationProvider.getApplicationContext<Application>()
 
     @Before
     fun setUp() {
