@@ -25,7 +25,7 @@ import sg.nedigital.myinfo.storage.MyInfoStorage
 
 @MyInfoScope
 class MyInfoConfiguration constructor(
-    val context: Context,
+    private val context: Context,
     private val storage: MyInfoStorage
 ) {
     companion object {
@@ -181,7 +181,7 @@ class MyInfoConfiguration constructor(
     }
 
     @Throws(InvalidConfigurationException::class)
-    internal fun getRequiredConfigUri(propName: String): Uri {
+    private fun getRequiredConfigUri(propName: String): Uri {
         val uriStr = getRequiredConfigString(propName)
         val uri: Uri
         uri = try {
@@ -210,7 +210,7 @@ class MyInfoConfiguration constructor(
     }
 
     @Throws(InvalidConfigurationException::class)
-    internal fun getRequiredConfigWebUri(propName: String): Uri {
+    private fun getRequiredConfigWebUri(propName: String): Uri {
         val uri = getRequiredConfigUri(propName)
         val scheme = uri.scheme
         if (TextUtils.isEmpty(scheme) || !("http" == scheme || "https" == scheme)) {
